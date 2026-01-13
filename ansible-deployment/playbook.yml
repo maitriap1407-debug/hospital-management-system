@@ -1,0 +1,11 @@
+---
+- name: Deploy Hospital Management System
+  hosts: local
+  gather_facts: no
+  vars:
+    project_root: "/project"
+    services_dir: "{{ project_root }}/services"
+    k8s_dir: "{{ project_root }}/k8s"
+
+  roles:
+    - deploy-services

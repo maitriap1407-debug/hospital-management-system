@@ -1,0 +1,14 @@
+services:
+  chatter-ansible:
+    container_name: chatter-ansible
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/project:ro
+      - .:/ansible
+      # Mount the docker socket if you want to manage host containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ANSIBLE_HOST_KEY_CHECKING=False
+    network_mode: host

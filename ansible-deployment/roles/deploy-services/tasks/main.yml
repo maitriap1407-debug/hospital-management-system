@@ -1,0 +1,36 @@
+---
+- name: Verify project directory mounting
+  ansible.builtin.stat:
+    path: "{{ project_root }}"
+  register: project_stat
+
+- name: Fail if project not mounted
+  ansible.builtin.fail:
+    msg: "Project directory not found at {{ project_root }}. Ensure volumes are correct."
+  when: not project_stat.stat.exists
+
+- name: List microservices to be managed
+  ansible.builtin.find:
+    paths: "{{ services_dir }}"
+    file_type: directory
+  register: microservices
+
+- name: Display detected microservices
+  ansible.builtin.debug:
+    msg: "Found service: {{ item.path | basename }}"
+  loop: "{{ microservices.files }}"
+
+- name: Check for Kubernetes manifests
+  ansible.builtin.stat:
+    path: "{{ k8s_dir }}/microservices.yaml"
+  register: k8s_manifest
+
+- name: Display Kubernetes manifest status
+  ansible.builtin.debug:
+    msg: "Kubernetes manifest found: {{ k8s_manifest.stat.exists }}"
+
+- name: Simulate deployment (Idempotent check)
+  ansible.builtin.debug:
+    msg: "Checking if deployment for {{ item.path | basename }} is up to date..."
+  loop: "{{ microservices.files }}"
+  tags: [deploy]

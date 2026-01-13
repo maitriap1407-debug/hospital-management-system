@@ -1,0 +1,191 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: micro-config
+data:
+  MONGO_URI: "mongodb://mongodb:27017/hospital_db"
+  JWT_SECRET: "thisisasercretkeyforhospitalapp123"
+  AUTH_SERVICE_URL: "http://auth-service:5001"
+  DOCTOR_SERVICE_URL: "http://doctor-service:5002"
+  PATIENT_SERVICE_URL: "http://patient-service:5003"
+  APPOINTMENT_SERVICE_URL: "http://appointment-service:5004"
+---
+# Auth Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: hospital-management-auth:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5001
+        envFrom:
+        - configMapRef:
+            name: micro-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  ports:
+  - port: 5001
+    targetPort: 5001
+  selector:
+    app: auth-service
+---
+# Doctor Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doctor-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doctor-service
+  template:
+    metadata:
+      labels:
+        app: doctor-service
+    spec:
+      containers:
+      - name: doctor-service
+        image: hospital-management-doctor:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5002
+        envFrom:
+        - configMapRef:
+            name: micro-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: doctor-service
+spec:
+  ports:
+  - port: 5002
+    targetPort: 5002
+  selector:
+    app: doctor-service
+---
+# Patient Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: patient-service
+  template:
+    metadata:
+      labels:
+        app: patient-service
+    spec:
+      containers:
+      - name: patient-service
+        image: hospital-management-patient:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5003
+        envFrom:
+        - configMapRef:
+            name: micro-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: patient-service
+spec:
+  ports:
+  - port: 5003
+    targetPort: 5003
+  selector:
+    app: patient-service
+---
+# Appointment Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appointment-service
+  template:
+    metadata:
+      labels:
+        app: appointment-service
+    spec:
+      containers:
+      - name: appointment-service
+        image: hospital-management-appointment:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5004
+        envFrom:
+        - configMapRef:
+            name: micro-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appointment-service
+spec:
+  ports:
+  - port: 5004
+    targetPort: 5004
+  selector:
+    app: appointment-service
+---
+# API Gateway (Acting as Backend for Frontend)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: hospital-management-gateway:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: micro-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    app: backend
