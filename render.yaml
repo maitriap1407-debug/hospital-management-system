@@ -1,33 +1,31 @@
+version: 1
 services:
   - type: web
-    name: hospital-backend
+    name: hms-api-backend
     env: node
     plan: free
-    region: oregon
     rootDir: backend
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: npm start
     envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 5000
       - key: MONGO_URI
+        sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: NODE_ENV
+        value: production
 
   - type: static
-    name: hospital-frontend
+    name: hms-web-frontend
     env: static
     plan: free
-    region: oregon
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://hospital-backend.onrender.com/api/*
+        destination: https://hms-api-backend.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
