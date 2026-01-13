@@ -1,39 +1,33 @@
-version: "1"
 services:
-  # Backend Service
   - type: web
-    name: hospital-management-backend
+    name: hospital-backend
     env: node
     plan: free
-    region: ohio
-    buildCommand: "cd backend && npm install"
-    startCommand: "cd backend && npm start"
+    region: oregon
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 5000
       - key: MONGO_URI
-        sync: false
       - key: JWT_SECRET
         generateValue: true
 
-  # Frontend Service
   - type: static
-    name: hospital-management-frontend
+    name: hospital-frontend
     env: static
     plan: free
-    region: ohio
-    buildCommand: "cd frontend && npm install && npm run build"
-    staticPublishPath: "frontend/dist"
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: no-cache
+    region: oregon
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://hospital-management-backend.onrender.com/api/*
+        destination: https://hospital-backend.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
